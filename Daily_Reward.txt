@@ -1,0 +1,264 @@
+/// --- Daily Reward System: A reward system for players who play more frequently
+/// -----------------------------------------------------------------------------
+/// --- ` How to claim ?: Stay 1 hour in-game(consecutively or not is counted.), Once you've reached the minimum minutes/hours you will be notified by the system that you are eligable to claim your daily reward. after that go to the Daily Reward NPC Giver and talk to him he will reward you based on your daily progress.
+/// --- ` Daily Delay ?: Daily reset at exactly 00:00:00 Server Time it will announce to the whole server that the delay timer has been reset, and you may now relog-in to initiate the timer again.(Minutes played, Daily Delay will be resetted.)
+/// --- ` Other Information ?: Once a player reached the 30days reward there will be no more reward after.
+/// --- ` Notes: All Rewards from Daily Reward is account bounded(All Transfer Method is not POSSIBLE.)
+/// ---
+/// --- ` v1.0 - Re-Rewrite
+/// --- ` Need to shorten the script [Soon]
+/// -----------------------------------------------------------------------------
+/// --- A remake version of stolao's daily reward system by.
+/// --- [Jeo Ong]
+/// --- jongpuno@ymail.com
+/// -----------------------------------------------------------------------------
+-	script	DailyReward	-1,{
+
+OnPCLoginEvent:
+	if(#Hour == .thour) { message strcharinfo(0),"[Daily Reward]: You are now eligable to claim your daily rewards, just talk to Daily Reward Giver NPC in mellina."; end; }
+	if(#DailyDelay == 1) end;
+	message strcharinfo(0),"[Daily Reward]: You have to remain logged in for [ "+(.thour - #Hour)+" ] minute"+((#Hour > 0)?"s":"")+" to claim your daily reward.";
+	addtimer .mins,"DailyReward::OnDailyGetPrize";
+	end;
+
+OnDailyGetPrize:
+	set #Hour,#Hour + 1;
+	if( #Hour == .thour) {
+	if( #DailyDelay >= 1 ) end;
+		message strcharinfo(0),"[Daily Reward]: You are now eligable to claim your daily rewards, just talk to Daily Reward Giver NPC in mellina.";
+		#Claim += 1;
+		#DailyDelay = 1;
+		end;
+	} // First If condition
+	addtimer .mins,"DailyReward::OnDailyGetPrize";
+	end;
+
+OnMinute59:
+	if(gettime(3) == 23){
+	query_sql("DELETE FROM `global_reg_value` WHERE `str` = '#DailyDelay'");
+	set .@size, query_sql("select account_id from `char` where online = 1", .@aid);
+	for(set .@i,0; .@i<.@size; set .@i,.@i+1) {
+		if(attachrid(.@aid[.@i])){
+			#DailyDelay = 0;
+			#Hour = 0;
+		}
+	}
+	announce "[Daily Rewards]: The global delay has been reset, you may now relog-in to initiate/start your timer to claim your next reward.",0;
+	end;
+	}
+	end;
+
+OnInit:	
+	/// ---- Core Settings
+	/// ----------------------------
+	set .mins,1000*60*1; // Mins 1000 * 60 * 1 = 1 minute
+	set .thour,60;    // Total Hour that player needs to reach once this var is reached it will jump to ongetprize
+	end;
+}
+
+
+/// ---- NPC DAILY REWARD GIVER
+/// ---------------------------------------------------
+mellina,77,73,1	script	Daily Reward Giver	573,{
+	mes "[ "+strnpcinfo(0)+" ]";
+	mes "Hello "+(Sex? "Mr.":"Ms/Mrs.")+" "+strcharinfo(0);
+	mes "How was your day today?";
+	mes "What would you like to do?";
+	next;
+OnDaily:
+switch(select("^00FF00+^000000 Daily Reward Information:^00FF00+^000000 Claim My Rewards:^0000FF-^000000 Cancel")) {
+case 1:
+	callfunc "GetInformation";
+	end;
+
+case 2:
+if(#Claim == 0 && #DailyDelay == 1) {
+	mes "[ "+strnpcinfo(0)+" ]";
+	mes "You have already claimed your daily reward for this day, Kindly wait for the delay to be reset at exaclty ^FF0000( 00:00:00 )^000000 Server Time";
+	mes "It will be announced.";
+	close;
+}
+if(#Claim <= 0) {
+	mes "[ "+strnpcinfo(0)+" ]";
+	mes "You have to stay logged in:";
+	mes "^FF0000"+(.totalhnpc - #Hour)+" minutes^000000";
+	mes "For you to claim your daily rewards..";
+	close;
+}
+	mes "[ "+strnpcinfo(0)+" ]";
+	mes "Hello, "+strcharinfo(0)+"";
+	mes "Base on our system you are now eligable to claim your rewards.";
+	mes "Would you like to claim your daily rewards now?!";
+	if(select("Yes, Please..:Not Today..")==1) {
+	next;
+	set .@g, (#DaysCount > getarraysize(.Rewards$)) ? (getarraysize(.Rewards$)-1) : #DaysCount;
+	explode(.@XT$,.Rewards$[.@g],"|");
+	for(set .@x,0; .@x < getarraysize(.@XT$); set .@x,.@x + 1){
+		set .@TT[.@x], atoi(.@XT$[.@x]);
+	}
+	if(.Mode & 1 && .@TT[4]){
+		for(set .@x,4; .@x < getarraysize(.@TT); set .@x,.@x + 2){
+		getitem  .@TT[.@x], .@TT[.@x+1];
+		message strcharinfo(0),"You have recieved [ "+.@TT[.@x+1]+" "+getitemname(.@TT[.@X])+" ] from Daily Rewards.";
+		}
+	} // Items Condition
+	if(.Mode & 2){
+		if(.@TT[0]){	set zeny,zeny + .@TT[0]; message strcharinfo(0),"You have recieved [ "+ .@TT[0] +"z ] from Daily Rewards";	}
+		if(.@TT[1]){	setd getd(.Points$[0]),getd(.Points$[0]) + .@TT[1]; message strcharinfo(0),"You have recieved "+ .@TT[1] +" "+.Points$[1];	}
+	}// Zeny/Points Condition
+		if(.Mode & 4 && (.@TT[3] || .@TT[4])) getexp .@TT[3], .@TT[4];
+		if(.Mode & 8){
+			for(set .@x,0; .@x < getarraysize(.BuffInfo); set .@x,.@x + 4){
+				if(#DaysCount% .BuffInfo[.@x + 1] == 0)
+					sc_start .BuffInfo[.@x], .BuffInfo[.@x + 2] * 60000, .BuffInfo[.@x + 3];
+			}
+		}
+	cutin .Pic$[.@g],4;
+	#DaysCount += 1;
+	#Hour = 0;
+	#Claim -= 1;
+	end;
+	}
+	next;
+	mes "[ "+strnpcinfo(0)+" ]";
+	mes "Really? Okay your choice.";
+	close;
+
+case 3:
+	close;
+
+}
+
+OnInit:
+	bindatcmd "daily",strnpcinfo(3)+"::OnDaily";
+	waitingroom "  Daily Reward",0;
+	/// ---- thour duplicate? nah. this is just for some checkpoints in the npc script
+	/// ---------------------------
+	set .totalhnpc,60;
+
+	/// ---- Modes < i will get back to this one, need to remove some mode that isn't suitable for this system
+	/// ----------------------------
+	set .Mode,1;
+
+	/// ---- Temporary? < Remove or not? :p
+	/// ----------------------------
+	setarray .Points$,"#KAFRAPOINTS","K-Points";
+
+	/// ---- I don't really understand this one, i hate numbers. :(
+	/// ----------------------------
+	setarray .BuffInfo	,260,2,360,1	// Life Insurance for 360 Mins Every 2nd Day
+				,198,3,120,10	// +10% Hp for 120 Mins Every 3th Day
+				,196,5,120,25	// +25 Flee for 120 Mins Every 5th Day
+				,257,7,240,50;	// +50% Exp for 240 Mins Every 7th Day
+
+	/// ---- Rewards
+	/// ----------------------------
+	setarray .Rewards$,
+		"0|0|0|0|12214|5",		// Day 01: Convex Mirror x5
+		"0|0|0|0|12210|3",		// Day 02: Bubblegum x3
+		"0|0|0|0|40091|20",		// Day 03: Mixed Potion Box x20
+		"0|0|0|0|40000|5",		// Day 04: Cronus Coin x5
+		"0|0|0|0|121031|10",		// Day 05: Bloody Branch x10
+		"0|0|0|0|40202|1",		// Day 06: Special OCA x1
+		"0|0|0|0|40001|2",		// Day 07: Up Refine Scroll x2
+		"0|0|0|0|7539|5",		// Day 08: Poring Coin x5
+		"0|0|0|0|12103|15",		// Day 09: Bloody Branch x15
+		"0|0|0|0|12214|10",		// Day 10: Convex Mirror x10
+		"0|0|0|0|12210|5",		// Day 11: Bubblegum x5
+		"0|0|0|0|40091|30",		// Day 12: Mixed Potion Box x30
+		"0|0|0|0|40201|1",		// Day 13: Random Cash Envelope x1
+		"0|0|0|0|40202|2",		// Day 14: Special OCA x2
+		"0|0|0|0|40200|5",		// Day 15: Food Basket x5
+		"0|0|0|0|12210|7",		// Day 16: Bubblegum x7
+		"0|0|0|0|40000|10",		// Day 17: Cronus Coin x10
+		"0|0|0|0|7539|10",		// Day 18: Poring Coin x10
+		"0|0|0|0|12103|15",		// Day 19: Bloody Branch x15
+		"0|0|0|0|40202|2",		// Day 20: Special OCA x2
+		"0|0|0|0|40001|2",		// Day 21: UP Refine Scroll x2
+		"0|0|0|0|12214|60",		// Day 22: Convex Mirror x10
+		"0|0|0|0|40091|10",		// Day 23: Mixed Potion Box x60
+		"0|0|0|0|40200|10",		// Day 24: Food Basket x10
+		"0|0|0|0|12210|10",		// Day 25: Bubblegum x10
+		"0|0|0|0|40001|2",		// Day 26: Up Refine Scroll x2
+		"0|0|0|0|40201|3",		// Day 27: Random Cash Envelope x3
+		"0|0|0|0|40202|2",		// Day 28: Special OCA x2
+		"0|0|0|0|40203|1",		// Day 29: Costume Mystery Box x1
+		"0|0|0|0|40204|1";		// Day 30: Godlike Treasure Box x1
+
+	/// ---- Cutins
+	/// -----------------
+	setarray .Pic$,
+		"croday01.bmp",
+		"croday02.bmp",
+		"croday03.bmp",
+		"croday04.bmp",
+		"croday05.bmp",
+		"croday06.bmp",
+		"croday07.bmp",
+		"croday08.bmp",
+		"croday09.bmp",
+		"croday10.bmp",
+		"croday11.bmp",
+		"croday12.bmp",
+		"croday13.bmp",
+		"croday14.bmp",
+		"croday15.bmp",
+		"croday16.bmp",
+		"croday17.bmp",
+		"croday18.bmp",
+		"croday19.bmp",
+		"croday20.bmp",
+		"croday21.bmp",
+		"croday22.bmp",
+		"croday23.bmp",
+		"croday24.bmp",
+		"croday25.bmp",
+		"croday26.bmp",
+		"croday27.bmp",
+		"croday28.bmp",
+		"croday29.bmp",
+		"croday30.bmp";
+		end;
+
+}
+
+
+
+/// ---- Seperated Script just to make the Display Information much cleaner.
+/// ----------------------------------------------------------------------------
+function	script	GetInformation	{
+	mes "[ "+strnpcinfo(0)+" ]";
+	mes ""+((#DaysCount == 0)?"You haven't collected any rewards yet.":"You have collected your daily reward for ^FF0000"+#DaysCount+" day"+((#DaysCount >= 0)?"s":"")+"")+"^000000.";
+	close2;
+	if(!#DaysCount) { cutin "croday00.bmp",4; end; }
+	if(#DaysCount == 1) { cutin "croday01.bmp",4; end; }
+	if(#DaysCount == 2) { cutin "croday02.bmp",4; end; }
+	if(#DaysCount == 3) { cutin "croday03.bmp",4; end; }
+	if(#DaysCount == 4) { cutin "croday04.bmp",4; end; }
+	if(#DaysCount == 5) { cutin "croday05.bmp",4; end; }
+	if(#DaysCount == 6) { cutin "croday06.bmp",4; end; }
+	if(#DaysCount == 7) { cutin "croday07.bmp",4; end; }
+	if(#DaysCount == 8) { cutin "croday08.bmp",4; end; }
+	if(#DaysCount == 9) { cutin "croday09.bmp",4; end; }
+	if(#DaysCount == 10) { cutin "croday10.bmp",4; end; }
+	if(#DaysCount == 11) { cutin "croday11.bmp",4; end; }
+	if(#DaysCount == 12) { cutin "croday12.bmp",4; end; }
+	if(#DaysCount == 13) { cutin "croday13.bmp",4; end; }
+	if(#DaysCount == 14) { cutin "croday14.bmp",4; end; }
+	if(#DaysCount == 15) { cutin "croday15.bmp",4; end; }
+	if(#DaysCount == 16) { cutin "croday16.bmp",4; end; }
+	if(#DaysCount == 17) { cutin "croday17.bmp",4; end; }
+	if(#DaysCount == 18) { cutin "croday18.bmp",4; end; }
+	if(#DaysCount == 19) { cutin "croday19.bmp",4; end; }
+	if(#DaysCount == 20) { cutin "croday20.bmp",4; end; }
+	if(#DaysCount == 21) { cutin "croday21.bmp",4; end; }
+	if(#DaysCount == 22) { cutin "croday22.bmp",4; end; }
+	if(#DaysCount == 23) { cutin "croday23.bmp",4; end; }
+	if(#DaysCount == 24) { cutin "croday24.bmp",4; end; }
+	if(#DaysCount == 25) { cutin "croday25.bmp",4; end; }
+	if(#DaysCount == 26) { cutin "croday26.bmp",4; end; }
+	if(#DaysCount == 27) { cutin "croday27.bmp",4; end; }
+	if(#DaysCount == 28) { cutin "croday28.bmp",4; end; }
+	if(#DaysCount == 29) { cutin "croday29.bmp",4; end; }
+	if(#DaysCount == 30) { cutin "croday30.bmp",4; end; }
+}
