@@ -1,0 +1,297 @@
+// Warper
+mellina,104,79,3	script	Fishing Area	560,{
+
+if(select("^00FF00+^000000 Fishing Area:^FF0000-^000000 Cancel")==1){
+	warp "fishing",182,87;
+	end;
+	}
+	close;
+}
+
+fishing,139,70,0	script	Fishing Hole	844,{
+
+//Fishing rod
+set .@Rod,2764;
+//Fishing Lure
+set .@Lure,2775;
+//Auto-Fish
+set .@Auto,0;
+
+Fish:
+	//if(countitem(501) < 1) {
+	//	dispbottom "You're missing 1 "+getitemname(501)+".";
+	//	end;
+	//}
+	if (isequipped(.@Rod)) && (isequipped(.@Lure)){
+		specialeffect EF_BUBBLE,"Fishing Hole";
+		//soundeffect "fishingrod.wav",0;
+		dispbottom "[Fishing] Casting...";
+		set .@fcast,10;
+			if (isequipped(2550)) { //Fisher's Muffler
+				set .@fcast,.@fcast - 2;
+			}
+			if (isequipped(2443)) { //Fisher's Boots
+				set .@fcast,.@fcast - 2;
+			}
+			if (isequipped(2764)) { //Fishing Pole
+				set .@fcast,.@fcast - 3;
+			}
+			if (isequipped(2775)) { //Fishing Lure
+				set .@fcast,.@fcast - 1;
+			}
+		specialeffect2 457;
+		progressbar "ffffff",.@fcast;
+		//delitem 501,1;
+
+	// ------------------------------------------
+	// Non Auto-Click User
+	// ------------------------------------------
+		if(fclick == 0) {
+			if (rand(1,70) == 2){
+			setarray .@SemiRare[0],6096,13517,40091,7711,7539;
+			set .@SRareRand,.@SemiRare[rand(getarraysize(.@semiRare))];
+			getitem .@SRareRand,1; //Fish with Blue Back
+			specialeffect2 EF_TEMP_OK;
+			//soundeffectall "success.wav",0,strcharinfo(3);
+			mapannounce strcharinfo(3),strcharinfo(0)+" has caught a Blue Fish!",bc_map,"0xff77ff";
+			if(.@Auto==1){
+			goto Fish;}else{
+			end;}
+			}
+				if (rand(1,6) == 1) ||(rand(1,6) == 3) || (rand(1,6) == 6){
+				setarray .@Catch[0],579,908,909,963,956,6049,918,960,910,938,624;// List of Junk/Other
+				set .@CatchRand,.@Catch[rand(getarraysize(.@Catch))];
+				getitem .@CatchRand,1;
+				}
+				else {
+				dispbottom "[Fishing] Nothing was caught...";
+				}
+			if (rand(1,300) == 2){
+			setarray .@Rare[0],40001,40003;
+			set .@RareCatch, .@Rare[rand(getarraysize(.@Rare))];
+			getitem .@RareCatch,1; //Reward
+			mapannounce strcharinfo(3),strcharinfo(0)+" has caught a "+getitemname(.@RareCatch)+"!",bc_map,"0x33CC00";
+			}
+			if(.@Auto==1){
+			goto Fish;} else{
+			end;}
+			}
+	// ------------------------------------------
+	// Auto-Click User
+	// ------------------------------------------
+		set fclick,fclick-1;
+		dispbottom "You have "+fclick+" Auto-Clicks left.";
+		if (rand(1,70) == 2){
+		setarray .@SemiRare[0],6096,13517,40091,7711,7539;
+		set .@SRareRand,.@SemiRare[rand(getarraysize(.@semiRare))];
+		getitem .@SRareRand,1; //Fish with Blue Back
+		specialeffect2 EF_TEMP_OK;
+		//soundeffectall "success.wav",0,strcharinfo(3);
+		mapannounce strcharinfo(3),strcharinfo(0)+" has caught a "+.@SRareRand+"!",bc_map,"0xff77ff";
+		if(fclick > 0){
+		goto Fish;}else{
+		end;}
+		}
+			if (rand(1,6) == 1) ||(rand(1,6) == 3) || (rand(1,6) == 6){
+			setarray .@Catch[0],579,908,909,963,956,6049,918,960,910,938,624;// List of Junk/Other
+			set .@CatchRand,.@Catch[rand(getarraysize(.@Catch))];
+			getitem .@CatchRand,1;
+			}
+			else {
+			dispbottom "[Fishing] Nothing was caught...";
+			}
+		if (rand(1,800) == 2){
+		setarray .@Rare[0],40001,40003;
+		set .@RareCatch, .@Rare[rand(getarraysize(.@Rare))];
+		getitem .@RareCatch,1; //Reward
+		mapannounce strcharinfo(3),strcharinfo(0)+" has caught a "+getitemname(.@RareCatch)+"!",bc_map,"0x33CC00";
+		}
+		if(fclick > 0){
+		goto Fish;} else{
+		end;}
+		}
+	else {
+	dispbottom "[Fishing] You need a Rod and Lure.";
+	end;
+	}
+
+L_NoClick:
+	dispbottom "You have no more auto-clicks.";
+	end;
+}
+
+fishing,137,73,0	duplicate(Fishing Hole)	Fishing Hole#1	844
+fishing,139,76,0	duplicate(Fishing Hole)	Fishing Hole#2	844
+fishing,138,79,0	duplicate(Fishing Hole)	Fishing Hole#3	844
+fishing,141,66,0	duplicate(Fishing Hole)	Fishing Hole#4	844
+fishing,144,67,0	duplicate(Fishing Hole)	Fishing Hole#5	844
+fishing,147,66,0	duplicate(Fishing Hole)	Fishing Hole#6	844
+fishing,151,67,0	duplicate(Fishing Hole)	Fishing Hole#7	844
+fishing,154,66,0	duplicate(Fishing Hole)	Fishing Hole#8	844
+fishing,158,67,0	duplicate(Fishing Hole)	Fishing Hole#9	844
+fishing,162,66,0	duplicate(Fishing Hole)	Fishing Hole#10	844
+fishing,166,67,0	duplicate(Fishing Hole)	Fishing Hole#11	844
+fishing,170,65,0	duplicate(Fishing Hole)	Fishing Hole#12	844
+fishing,139,83,0	duplicate(Fishing Hole)	Fishing Hole#13	844
+fishing,163,89,0	duplicate(Fishing Hole)	Fishing Hole#14	844
+fishing,157,91,0	duplicate(Fishing Hole)	Fishing Hole#15	844
+fishing,149,90,0	duplicate(Fishing Hole)	Fishing Hole#16	844
+fishing,141,87,0	duplicate(Fishing Hole)	Fishing Hole#17	844
+fishing,172,88,0	duplicate(Fishing Hole)	Fishing Hole#18	844
+fishing,174,93,0	duplicate(Fishing Hole)	Fishing Hole#19	844
+fishing,172,96,0	duplicate(Fishing Hole)	Fishing Hole#20	844
+fishing,171,100,0	duplicate(Fishing Hole)	Fishing Hole#21	844
+fishing,173,103,0	duplicate(Fishing Hole)	Fishing Hole#22	844
+fishing,173,109,0	duplicate(Fishing Hole)	Fishing Hole#23	844
+
+
+-	shop	FishEqs	-1,2550:500000,2443:500000,2764:500000,2775:500000
+
+fishing,185,91,3	script	Fishing Information	837,{
+
+	.@fboard$ = "[ Fishing Information ]";
+	mes .@fboard$;
+	mes "--------------------------";
+	mes "    ^FF0000Semi-Rare Reward:^000000";
+	mes "--------------------------";
+	mes "^0000FF"+getitemname(6096)+"^000000 - 1pc";
+	mes "^0000FF"+getitemname(13517)+"^000000 - 1pc";
+	mes "^0000FF"+getitemname(40091)+"^000000 - 1pc";
+	mes "^0000FF"+getitemname(7711)+"^000000 - 1pc";
+	mes "^0000FF"+getitemname(7539)+"^000000 - 1pc";
+	mes " ";
+	mes "--------------------------";
+	mes "    ^FF0000Super-Rare Reward:^000000";
+	mes "--------------------------";
+	mes "^0000FF"+getitemname(40001)+"^000000 - 1pc";
+	mes "^0000FF"+getitemname(40003)+"^000000 - 1pc";
+	close;
+
+}
+
+fishing,188,88,3	script	Fishing Manager	548,{
+.ticketid = 40003;
+
+mes "[ Fishing Manager ]";
+mes "Hello, Do you need anything from the shop?";
+
+switch(select("^00FF00+^000000 Fishing Equipments:^00FF00+^000000 Purchase Auto-Clicker:^00FF00+^000000 Exchange Blue Fish:^00FF00+^000000 Exchange Piece of Refine Ticket")) {
+	case 1:
+		close2;
+		callshop "FishEqs",1;
+		end;
+	case 2:
+		next;
+		mes "[ Fishing Manager ]";
+		mes "So, how many clicks do you want to purchase?";
+		switch(select("250 Auto-Clicks - 25m:500 Auto-Clicks - 50m:2500 Auto-Clicks - 250m")) {
+
+	case 1:
+		next;
+		if(Zeny > 25000000) {
+		set fclick,fclick+250;
+		set zeny,zeny-3000000;
+		mes "[ Fishing Manager ]";
+		mes "There you go 250 Auto Clicks has been set to your character.";
+		dispbottom "You currently have "+callfunc("F_InsertComma",fclick)+" Auto-Clicks.";
+		close;
+		}
+		mes "You don't have enough zeny.";
+		close;
+	case 2:
+		next;
+		if(Zeny > 50000000) {
+		set fclick,fclick+500;
+		set zeny,zeny-50000000;
+		mes "[ Fishing Manager ]";
+		mes "There you go 500 Auto Clicks has been set to your character.";
+		dispbottom "You currently have "+callfunc("F_InsertComma",fclick)+" Auto-Clicks.";
+		close;
+		}
+		mes "You don't have enough zeny.";
+		close;
+	case 3:
+		next;
+		if(Zeny > 250000000) {
+		set fclick,fclick+2500;
+		set zeny,zeny-250000000;
+		mes "[ Fishing Manager ]";
+		mes "There you go 2,500 Auto Clicks has been set to your character.";
+		dispbottom "You currently have "+callfunc("F_InsertComma",fclick)+" Auto-Clicks.";
+		close;
+		}
+		mes "You don't have enough zeny.";
+		close;
+		}
+case 3:
+	next;
+	set .bfishamount,1000;
+	mes "[ Fishing Manager ]";
+	mes "I can exchange your ^FF0000"+callfunc("F_InsertComma",.bfishamount)+"^000000 pcs of ^0000FF"+getitemname(6096)+"^000000 to a ^0000FFPiece of Refine Ticket^000000.";
+	mes "Do you wish to proceed?";
+	switch(select("^00FF00+^000000 Proceed.:^FF0000-^000000 Forget it.")) {
+	next;
+			case 1:
+				if(countitem(6096) >= .bfishamount) {
+					delitem 6096,.bfishamount;
+					getitem 7711,1;
+					mes "[ Fishing Manager ]";
+					mes "There you go, nice to deal with you.";
+					close;
+				}
+					mes "[ Fishing Manager ]";
+					mes "You don't have enough ^0000FF"+getitemname(6096)+"^000000, please bring atleast ^FF0000"+callfunc("F_InsertComma",.bfishamount)+"^000000 pcs.";
+					close;
+			case 2:
+				close;
+		}
+case 4:
+	next;
+	mes "[ Fishing Manager ]";
+	mes "Do you really want to exchange your ^FF00005^000000 pcs of ^0000FF"+getitemname(.ticketid)+"^000000 to ^0000FFWeapon Refine Ticket^000000 or ^0000FFArmor Refine Ticket^000000?";
+	switch(select("^00FF00+^000000+1 Refine Ticket:^FF0000-^000000 Nevermind.")) {
+	next;
+		// Weapon Ticket
+		case 1:
+			if(countitem(.ticketid) >= 5) {
+				delitem .ticketid,5;
+				getitem 4001,1;
+				mes "[ Fishing Manager ]";
+				mes "There you go, its a pleassure doing business with you.";
+				close;
+			}
+			mes "[ Fishing Manager ]";
+			mes "You don't have enough ^0000FF"+getitemname(7711)+"^000000, please bring atleast 5 pcs.";
+			close;
+		// Armor Ticket
+		case 2:
+			mes "[ Fishing manager ]";
+			mes "Alright, just talk to me again when u need my services.";
+			close;
+		}
+	} // End of First Switch
+}
+
+fishing,163,56,0,0	monster	Tuna	1158,3,0,0,0
+fishing,148,56,0,0	monster	Tuna	1158,3,0,0,0
+fishing,134,59,0,0	monster	Tuna	1158,3,0,0,0
+fishing,127,74,0,0	monster	Tuna	1158,3,0,0,0
+fishing,134,89,0,0	monster	Tuna	1158,3,0,0,0
+fishing,142,97,0,0	monster	Tuna	1158,3,0,0,0
+fishing,156,99,0,0	monster	Tuna	1158,3,0,0,0
+fishing,169,116,0,0	monster	Tuna	1158,3,0,0,0
+fishing,163,121,0,0	monster	Tuna	1158,3,0,0,0
+
+fishing,163,56,0,0	monster	Tuna	1266,2,0,0,0
+fishing,148,56,0,0	monster	Tuna	1266,2,0,0,0
+fishing,134,59,0,0	monster	Tuna	1266,2,0,0,0
+fishing,127,74,0,0	monster	Tuna	1266,2,0,0,0
+fishing,134,89,0,0	monster	Tuna	1266,2,0,0,0
+fishing,142,97,0,0	monster	Tuna	1266,2,0,0,0
+fishing,156,99,0,0	monster	Tuna	1266,2,0,0,0
+fishing,169,116,0,0	monster	Tuna	1266,2,0,0,0
+fishing,163,121,0,0	monster	Tuna	1266,2,0,0,0
+
+fishing	mapflag	nomobloot
+fishing	mapflag	noteleport
+fishing	mapflag	nowarpto
