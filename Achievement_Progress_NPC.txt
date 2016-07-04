@@ -1,0 +1,33 @@
+mellina,98,60,3	script	halloffamer	100,{
+
+mes "1. Poring Slayer - "+((achievement_info(2,0) >= 1)?"^00FF00Completed^000000":"^FF0000Not Completed Yet^000000")+"";
+close;
+}
+
+mellina,96,60,3	script	teste	100,{
+
+setarray .@acount[0],1,2;
+
+mes "[Achievement Progress]";
+for(set .@i,0; .@i < getarraysize(.@acount); set .@i,.@i+1){
+	mes "1."+achievement_info(.@acount[.@i],2)+" - "+((achievement_info(.@acount[.@i],0) >= 1)?"^00FF00Completed^000000":"^FF0000Not Completed^000000")+"";
+	mes "2."+achievement_info(.@acount[.@i+1],2)+" - "+((achievement_info(.@acount[.@i+1],0) >= 1)?"^00FF00Completed^000000":"^FF0000Not Completed^000000")+"";
+	mes "3."+achievement_info(.@acount[.@i],2)+" - "+((achievement_info(.@acount[.@i],0) >= 1)?"^00FF00Completed^000000":"^FF0000Not Completed^000000")+"";
+	close;
+	}
+}
+
+mellina,94,56,3	script	rjhrw	100,{
+
+	mes ""+achieve_progress(2)+"";
+	close;
+}
+
+/*
+if(achievement_info(2,1) < 1) {
+	mes "You have no progress";
+	close;
+}
+	mes "You have 1 progress";
+close;
+*/
