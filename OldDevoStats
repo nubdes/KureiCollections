@@ -1,0 +1,7 @@
+// Old Devotion's status icon on party members that is devoted
+// status.c
+Find:
+if(!(flag&SCSTART_NOICON) && !(flag&SCSTART_LOADED && StatusDisplayType[type]))
+
+Replace with:
+if(!(flag&SCSTART_LOADED && StatusDisplayType[type]))
