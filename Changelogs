@@ -1,0 +1,17 @@
+// Changes made in status.c
+// Reason follow some rAthena bug fixes it might fixed the issue of crashing the server ?
+
+  // Default
+		case BL_SKILL:
+		  return ((TBL_SKILL*)bl)->group->party_id;
+		  break; 
+		  
+		  
+	// Fix
+		case BL_SKILL:
+			// Removing Line change to 3 lines based on bug fixes in rathena
+			// Need more info ? [Kurei]
+			//return ((TBL_SKILL*)bl)->group->party_id;
+			if (((TBL_SKILL*)bl)->group)
+				return ((TBL_SKILL*)bl)->group->party_id;
+			break;
