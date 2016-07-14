@@ -1,0 +1,160 @@
+/* 
+   ||======================================================|| 
+   ||======================================================|| 
+   ||			NPC:				   || 
+   ||======================================================|| 
+   ||			Evolution Wings			   || 
+   ||======================================================|| 
+   ||			Version 1.3			   || 
+   ||======================================================|| 
+   ||			Made by Streiker		   || 
+   ||======================================================|| 
+   ||		Updates:				   || 
+   ||		(5 latests)				   || 
+   || Version 1.1:					   || 
+   ||		Fixed: The npc didn't work.		   || 
+   ||		Added new configs.			   || 
+   ||		Changed the exp rates system.		   || 
+   ||							   || 
+   || Version 1.1.1:					   || 
+   ||			  Fixed: Mistakes.		   || 
+   ||							   || 
+   || Version 1.2:					   || 
+   ||		Added rahuldev345 suggestion (spec. mobs)  || 
+   ||		Added AnnieRuru suggestion (refine)	   || 
+   ||							   || 
+   || Version 1.3:					   || 
+   ||		Added new mode, new confs, new vars.	   || 
+   ||======================================================|| 
+   ||Description:					   || 
+   ||		   					   || 
+   || Make easily "evolution wings" with this.		   || 
+   ||======================================================|| 
+   ||	  Additional Comments:				   || 
+   ||							   || 
+   || At the moment none.				   || 
+   ||======================================================|| 
+   ||======================================================|| 
+*/ 
+
+-	script	Wings_Conf	-1,{
+
+OnInit: 
+ 
+/* Evolution modes: 
+ 
+1 = Every X numer of mobs (1%). 
+2 = Experience (1%). 
+3 = Every X number of mobs (100%). 
+ 
+*/ 
+
+	set .rates, 100;	// % (Only for Mode 2). 
+ 
+/* ID[...], evolution mode[...], mob id[...], neccesary to advance 1%[...]. 
+(Configured for the 1st mode). 
+If  you want any monster, use 111. 
+// Use callsub for add more wings. */ 
+	callsub Ids, 30635, 1, 111, 1, 30636, 1, 111, 1, 30637, 1, 111, 0 ;
+ 
+/* 
+0 = Won't evolved automatically. 
+1 = Will be evolved automatically 
+*/ 
+	set .auto, 1; 
+ 
+// Delay of evolution (miliseconds). 
+	set .time, 3000; 
+ 
+// Announces color. 
+	setarray .c$[0],"4db557",	// % of evolution. 
+					"d43438",	// Wings evolving. 
+					"4da5b5";	// Wings evolved. 
+
+	set .w1, 0; 
+ 
+	end ; 
+ 
+Ids: 
+ 
+	set .w1, .w1 + 1; 
+	for ( set .@a, 0; getarg ( .@a, 0 ) != 0 ; set .@a, .@a + 4 ) { 
+		set .w2[.w1 - 1], .w2[.w1 - 1] + 1; 
+		setd ".a1"+ .w1 +"_"+ .w2[.w1 - 1], getarg ( .@a );	  // id. 
+		setd ".a2"+ .w1 +"_"+ .w2[.w1 - 1], getarg ( .@a + 1 );	// mode. 
+		setd ".a3"+ .w1 +"_"+ .w2[.w1 - 1], getarg ( .@a + 2 );	// mob id. 
+		setd ".a4"+ .w1 +"_"+ .w2[.w1 - 1], getarg ( .@a + 3 );	// amount. 
+	} 
+	return ; 
+ 
+OnNPCKillEvent: 
+ 
+	setarray .@slots[0], 1, 9, 10; // put here your slots.
+	for ( set .@a, 0; .@a < 3 && ! .@c ; set .@a, .@a + 1 ) {
+		if ( set ( .@e, getequipid ( .@slots[.@a] ) ) < 0 )
+			continue ;
+		set .@id, 0;
+		set .@w, 1;
+		while ( set ( .@id, .@id + 1 ) <= .w2[.@w - 1] && ! .@c ) {
+			if ( .@e == getd ( ".a1"+ .@w +"_"+ .@id ) ) {
+				set .@c, ( getd ( ".a4"+ .@w +"_"+ .@id ) > 0 ) * ( killedrid == getd ( ".a3"+ .@w +"_"+ .@id ) || getd ( ".a3"+ .@w +"_"+ .@id ) < 1001 );
+				if ( .@c )
+					break ;
+			}
+			if ( .@id >= .w2[.@w - 1] ) {
+				set .@id, 0;
+				set .@w, .@w + 1;
+			}
+		}
+	}
+	if ( ! ( .@c ) ) end ; 
+	set .@e2, getd ( "evo"+ .@e ); 
+	if ( getd ( ".a2"+ .@w +"_"+ .@id ) == 1 ) { 
+		setd "$Mobs_"+ getcharid ( 0 ) +"_"+ .@e, getd("$Mobs_"+ getcharid( 0 ) +"_"+ .@e ) + 1; 
+		if ( ( getd ( "$Mobs_"+getcharid ( 0 ) ) % getd ( ".a4"+ .@w +"_"+ .@id ) ) ) end ; 
+		setd "evo"+ .@e, getd ( "evo"+ .@e ) + 1; 
+		setd "$Mobs_"+ getcharid ( 0 ) +"_"+ .@e, 0; 
+	} 
+	else if ( getd ( ".a2"+ .@w +"_"+ .@id ) == 2 ) { 
+		setd "$Exp_"+ getcharid ( 0 ) +"_"+ .@e, getd ("$Exp_"+ getcharid ( 0 ) +"_"+ .@e ) + ( strmobinfo ( 6, killedrid ) * .rates / 100 ); 
+		if ( getd ( "$Exp_"+getcharid ( 0 ) +"_"+ .@e ) < getd ( ".a4"+ .@w +"_"+ .@id ) ) end ; 
+		setd "evo"+ .@e, getd ( "evo"+ .@e ) + 1; 
+		setd "$Exp_"+ getcharid ( 0 ), 0; 
+	} 
+	else if ( getd ( ".a2"+ .@w +"_"+ .@id ) == 3 ) { 
+		setd "$Mobs_"+ getcharid ( 0 ), getd ("$Mobs_"+ getcharid( 0 ) +"_"+ .@e ) + 1; 
+		if ( ( getd ( "$Mobs_"+ getcharid ( 0 ) +"_"+ .@e ) % getd ( ".a4"+ .@w +"_"+ .@id ) ) ) end ; 
+		setd "evo"+ .@e, getd ( "evo"+ .@e ) + 100; 
+		setd "$Mobs_"+ getcharid ( 0 ) +"_"+ .@e, 0; 
+	} 
+	else debugmes "Script Wings_Evo, error: wrong mode configuration."; 
+	if ( .@e2 != getd ( "evo"+ .@e ) ) { 
+		announce getd ( "evo"+ .@e ) +"% "+ getitemname ( .@e ) , bc_self, "0x"+ .c$[0] ; 
+		specialeffect2 58 ; 
+		sleep2 200 ; 
+		specialeffect2 383 ; 
+	} 
+	if ( getd ( "evo"+ .@e ) >= 100 && .auto ) { 
+		specialeffect2 263 ; 
+		sleep2 500 ; 
+		specialeffect2 377 ; 
+		sleep2 300 ; 
+		specialeffect2 542 ; 
+		sleep2 300 ; 
+		announce getitemname ( .@e ) +" evolving..." , bc_self, "0x"+ .c$[1] ; 
+		if ( .time ) sleep2 .time ; 
+		specialeffect2 463 ; 
+		sleep2 200; 
+		specialeffect2 665 ; 
+		sleep2 500 ; 
+		//specialeffect2 437 ; 
+		setarray .@card[1], getequipcardid ( .slot, 0 ), getequipcardid ( .slot, 1 ), getequipcardid ( .slot, 2 ), getequipcardid ( .slot, 3 ); 
+		set .@refine, getequiprefinerycnt ( .slot ); 
+		delitem .@e, 1 ; 
+		getitem2 getd ( ".a1"+ .@w +"_"+ ( .@id + 1 ) ) , 1, 1, .@refine, 0, .@card[1], .@card[2], .@card[3], .@card[4] ; 
+		equip getd ( ".a1"+  .@w +"_"+ ( .@id + 1 ) ) ; 
+		setd "evo"+ .@e, 0; 
+		announce "Congratulations, your wings have evolved to "+ getitemname ( getd ( ".a1"+ .@w +"_"+ ( .@id + 1 ) ) ) +"." , bc_self , "0x"+ .c$[2] ; 
+	} 
+	end; 
+}
