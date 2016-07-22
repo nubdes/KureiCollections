@@ -1,0 +1,18 @@
+Auto Blitz per 0.3 Luck 
+
+Open src/map/skill.c
+Find:
+   // Automatic trigger of Blitz Beat
+   if (pc_isfalcon(sd) && sd->status.weapon == W_BOW && (skill=pc_checkskill(sd,HT_BLITZBEAT))>0 &&
+	rnd()%1000 <= sstatus->luk*10/3+1 ) {
+	rate=(sd->status.job_level+9)/10;
+	skill_castend_damage_id(src,bl,HT_BLITZBEAT,(skill<rate)?skill:rate,tick,SD_LEVEL);
+   }
+   
+   After Add:
+   // Automatic trigger of Falcon Assault, customized source. [MarkZD]
+   if (sc && sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_HUNTER && pc_isfalcon(sd) && sd->status.weapon == W_BOW &&
+   (skill=pc_checkskill(sd,SN_FALCONASSAULT))>0 &&
+    rnd()%1000 <= sstatus->luk*10/3+1 ) {
+    skill_castend_damage_id(src,bl,SN_FALCONASSAULT,skill,tick,SD_LEVEL);
+   }
