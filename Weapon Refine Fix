@@ -1,0 +1,10 @@
+// skill.c
+
+@@ -15595,6 +15595,7 @@ void skill_weaponrefine (struct map_session_data *sd, int idx)
+  pc_unequipitem(sd,idx,3);
+  }
+  clif_delitem(sd,idx,1,3);
++ clif_additem(sd,idx,1,0);
+  clif_upgrademessage(sd->fd, 0, item->nameid);
+  clif_inventorylist(sd);
+  clif_refine(sd->fd,0,idx,item->refine);
