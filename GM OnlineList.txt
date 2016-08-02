@@ -1,0 +1,42 @@
+prontera,158,179,5	script	GM Online Lists	856,{
+ 
+mes "Staffs Online Lists : ^FF0000"+getarraysize( .GM_Name$ )+"^000000 Staffs";
+mes "^0000FF_____________________________^000000";
+for( set .@i,0; .@i < getarraysize( .GM_Name$ ) ; set .@i,.@i + 1 ){
+        getmapxy( .Map$,.x,.y,0,.GM_Name$[.@i] );
+        mes "[ ^63D1F4"+.GM_Level$[.@i]+"^000000 ] ^FF0000- ^0000FF"+.GM_Name$[.@i]+"^000000";
+        mes "Location : ^0000FF"+.Map$+"^000000";
+        mes "^0000FF_____________________________^000000";
+        }
+close;
+ 
+OnInit:
+set .MinGMLevel,1;              // Min. GM Level to Show in Online Lists
+end;
+ 
+OnPCLoginEvent:
+set .@gmlevel,getgmlevel();
+if( .@gmlevel < .MinGMLevel ) end;
+set .@size,getarraysize( .GM_Name$ );
+set .GM_Name$[ .@size ],strcharinfo(0);
+if( .@gmlevel < 10 ) set .GM_Level$[ .@size ],"Super Player";
+else if( .@gmlevel < 20 ) set .GM_Level$[ .@size ],"Support";
+else if( .@gmlevel < 30 ) set .GM_Level$[ .@size ],"High Support";
+else if( .@gmlevel < 40 ) set .GM_Level$[ .@size ],"Event GM";
+else if( .@gmlevel < 70 ) set .GM_Level$[ .@size ],"Law Enforcement";
+else set .GM_Level$[ .@size ],"Admin";
+end;
+ 
+OnPCLogoutEvent:
+if( getgmlevel() < .MinGMLevel ) end;
+for( set .@i,0; .@i < getarraysize( .GM_Name$ ) ; set .@i,.@i + 1 )
+        if( strcharinfo(0) == .GM_Name$[.@i] ){
+            deletearray .GM_Name$[.@i],1;
+            deletearray .GM_Level$[.@i],1;
+            end;
+        }
+end;
+}
+
+// Special Thanks to Emistry for nice script and guide to make it works!
+// Edit some script to make it works on Milenia Ragnarok Online by Rakuzas.
