@@ -1,0 +1,11 @@
+Login with your root account.
+
+Look for etc/security/limits.conf
+
+make sure to un-comment this line.
+
+#*	soft	core	unlimited
+
+Do remember # means its commented. Now if you want to remove the comment it should be
+
+*			   soft	core			unlimited
