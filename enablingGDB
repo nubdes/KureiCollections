@@ -1,0 +1,15 @@
+There are more steps involved to get core dumps that have detailed information about the crash reason.
+
+First, eAthena has to be configured to enable debugging (e.g. for gdb):
+./configure --enable-debug=gdb
+If you don't want to edit the limits in the post above, but only for the current running shell, then use this:
+ulimit -c unlimitedMore about this here: http://compute.cnr.b...an-cgi?ulimit+2
+
+You can run the server now.
+
+Afterwards,you will have a file named 'core' (or something similiar) within your eAthena folder as soon as the server crashes. Use this to get detailed information:
+gdb <server> <core>, e.g.
+gdb map-server_sql core
+You may have to install gdb first with 'apt-get install gdb', however, inside gdb enter this to get detailed information:
+bt full
+It will display a call stack where the last called function is at top. There's also a line displayed to show you where the crash happened. Go ahead and check this line to fix it. 
