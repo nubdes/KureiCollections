@@ -1,0 +1,45 @@
+ db/castle_db.txt | 1 +
+ src/map/battle.c | 7 +++++++
+ src/map/battle.h | 1 +
+ 3 files changed, 9 insertions(+)
+
+diff --git a/db/castle_db.txt b/db/castle_db.txt
+index 5b2fd60..cfe2dd3 100644
+--- a/db/castle_db.txt
++++ b/db/castle_db.txt
+@@ -43,3 +43,4 @@
+ 31,arug_cas03,Horn,Manager#arug_cas03			// kRO : Horn
+ 32,arug_cas04,Gefn,Manager#arug_cas04			// kRO : Gefn
+ 33,arug_cas05,Bandis,Manager#arug_cas05			// kRO : Bandis
++100,guild_vs1,koe,koe
+\ No newline at end of file
+diff --git a/src/map/battle.c b/src/map/battle.c
+index 8ba1a47..1a33592 100644
+--- a/src/map/battle.c
++++ b/src/map/battle.c
+@@ -6576,6 +6576,13 @@ int battle_check_target( struct block_list *src, struct block_list *target,int f
+ 	if( (s_bl = battle_get_master(src)) == NULL )
+ 		s_bl = src;
+ 
++	if ( s_bl->type == BL_PC && t_bl->type == BL_MOB ) {
++		struct map_session_data *sd = BL_CAST( BL_PC, s_bl );
++		if ( ( ( (TBL_MOB*)target )->mob_id == 1288 && !strcmp( mapindex_id2name(sd->mapindex), "guild_vs1" ) ) &&
++			( sd->status.guild_id == mapreg_readreg( add_str("$koegid") ) || battle_getcurrentskill(src) > 0 ) )
++		return 0;
++	}
++
+ 	if ( s_bl->type == BL_PC ) {
+ 		switch( t_bl->type ) {
+ 			case BL_MOB: // Source => PC, Target => MOB
+diff --git a/src/map/battle.h b/src/map/battle.h
+index 217998d..f7fa264 100644
+--- a/src/map/battle.h
++++ b/src/map/battle.h
+@@ -7,6 +7,7 @@
+ #include "../common/mmo.h"
+ #include "../config/core.h"
+ #include "map.h" //ELE_MAX
++#include "mapreg.h"
+ 
+ // state of a single attack attempt; used in flee/def penalty calculations when mobbed
+ typedef enum damage_lv {
