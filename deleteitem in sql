@@ -1,0 +1,4 @@
+DELETE FROM `cart_inventory` WHERE `nameid`=4128
+DELETE FROM `inventory` WHERE `nameid`=4128
+DELETE FROM `mail` WHERE `nameid`=4128
+DELETE FROM `storage` WHERE `nameid`=4128
